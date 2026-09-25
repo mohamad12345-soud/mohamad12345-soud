@@ -217,16 +217,18 @@ require([
   // تحميل عامل حساب المساحة للـ popup
   geodeticAreaOperator.load().catch(function () {});
 
-  // الامتداد الأولي = حدود فلسطين
-  layers.border.when(function () {
-    return layers.border.queryExtent();
-  }).then(function (r) {
-    if (r && r.extent) {
-      var ext = r.extent.expand(1.05);
-      home.viewpoint = { targetGeometry: ext };
-      return view.when(function () { return view.goTo(ext, { animate: false }); });
-    }
-  }).catch(function () {});
+  // الامتداد الأولي (وزر الهوم): حدود فلسطين مقرّبة درجة (نص المقياس)، ومتمركزة على الضفة وغزة
+  var HOME_ZOOM_FACTOR = 2;
+  Promise.all([layers.border.queryExtent(), layers.governorates.queryExtent(), view.when()]).then(function (r) {
+    var border = r[0] && r[0].extent, govExt = r[1] && r[1].extent;
+    if (!border) return;
+    syncPadding();
+    return view.goTo(border.expand(1.05), { animate: false }).then(function () {
+      return view.goTo({ target: (govExt || border).center, scale: view.scale / HOME_ZOOM_FACTOR }, { animate: false });
+    }).then(function () {
+      home.viewpoint = view.viewpoint.clone();
+    });
+  }).catch(function (e) { console.error(e); });
 
   // ===== حالة التطبيق =====
   var state = { gov: "", q: "", selected: null };
