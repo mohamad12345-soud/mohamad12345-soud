@@ -1,0 +1,123 @@
+:root {
+  --navy: #0c4a6e;
+  --blue: #0284c7;
+  --blue-d: #0369a1;
+  --green: #047857;
+  --gold: #ca8a04;
+  --text: #334155;
+  --ink: #0f172a;
+  --line: #e2e8f0;
+  --font: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: #f8fafc; color: var(--ink); font-family: var(--font); }
+body { padding: 16px; max-width: 1400px; margin: 0 auto; }
+
+/* ===== الهيدر ===== */
+.hdr {
+  background-color: #f0fdf4;
+  background-image:
+    linear-gradient(to right, rgba(13,148,136,.07) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(13,148,136,.07) 1px, transparent 1px),
+    linear-gradient(135deg, #ecfdf5 0%, #e0f2fe 55%, #fef9c3 100%);
+  background-size: 24px 24px, 24px 24px, 100% 100%;
+  border-bottom: 4px solid var(--gold); border-radius: 14px;
+  padding: 14px 28px 24px; box-shadow: 0 6px 24px rgba(15,23,42,.08);
+}
+.badge { display: inline-block; background: var(--green); color: #fff; padding: 4px 12px; border-radius: 20px; font-size: .85rem; font-weight: 700; }
+.hdr h1 { margin: 8px 0 6px; color: var(--navy); font-size: 1.7rem; font-weight: 800; line-height: 1.35; }
+.hdr p { margin: 0; color: var(--text); font-size: 1.02rem; border-right: 4px solid var(--gold); padding-right: 12px; line-height: 1.6; }
+
+/* ===== الكروت ===== */
+.dash { margin-top: 18px; }
+.cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.card {
+  position: relative; overflow: hidden; text-align: center;
+  background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 22px 12px 18px;
+  box-shadow: 0 2px 8px rgba(15,23,42,.04);
+  transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+}
+.card::before { content: ""; position: absolute; top: 0; right: 0; left: 0; height: 4px; background: var(--c); transform: scaleX(0); transform-origin: right; transition: transform .3s ease; }
+.card:hover { transform: translateY(-5px); box-shadow: 0 14px 30px rgba(15,23,42,.12); border-color: var(--c); }
+.card:hover::before { transform: scaleX(1); }
+.icon { width: 46px; height: 46px; margin: 0 auto 10px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 21px; background: var(--bg); transition: transform .3s ease; }
+.card:hover .icon { transform: scale(1.12) rotate(-6deg); }
+.num { font-size: 2.1rem; font-weight: 800; color: var(--c); line-height: 1.2; font-variant-numeric: tabular-nums; }
+.label { margin-top: 4px; font-size: 1rem; font-weight: 600; color: var(--text); }
+.c1 { --c: #0284c7; --bg: #e0f2fe; }
+.c2 { --c: #047857; --bg: #d1fae5; }
+.c3 { --c: #ca8a04; --bg: #fef9c3; }
+.c4 { --c: #7c3aed; --bg: #ede9fe; }
+
+/* ===== لوحات ===== */
+.panel { background: #fff; border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 2px 8px rgba(15,23,42,.04); }
+.chart-panel { margin-top: 16px; padding: 18px 20px; }
+.panel-hd { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 16px; border-bottom: 3px solid var(--blue-d); padding-bottom: 10px; margin-bottom: 14px; }
+.panel-hd h2 { margin: 0; font-size: 1.15rem; color: var(--ink); border-right: 6px solid var(--blue-d); padding-right: 10px; }
+.hint { font-size: .85rem; color: #64748b; }
+.loading, .err { padding: 20px; text-align: center; color: #64748b; }
+.err { color: #b91c1c; }
+
+/* ===== الشارت (أعمدة أفقية) ===== */
+.chart { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 32px; }
+.bar {
+  display: grid; grid-template-columns: 9.5em 1fr 2.6em; align-items: center; gap: 10px;
+  width: 100%; padding: 5px 6px; border: 0; border-radius: 8px; background: transparent;
+  font: inherit; color: var(--text); text-align: right; cursor: pointer; transition: background-color .15s;
+}
+.bar:hover, .bar:focus-visible { background: #f0f9ff; outline: none; }
+.bar.on { background: #e0f2fe; }
+.bar .nm { font-size: .92rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bar .tr { display: block; height: 14px; border-radius: 0 7px 7px 0; background: #f1f5f9; overflow: hidden; }
+.bar .fl { display: block; height: 100%; width: 0; border-radius: 0 7px 7px 0; background: var(--blue); transition: width .8s cubic-bezier(.2,.8,.2,1); }
+.bar.gz .fl { background: var(--green); }
+.bar.on .fl { background: var(--navy); }
+.bar .vl { font-weight: 800; color: var(--ink); font-variant-numeric: tabular-nums; }
+
+/* ===== المستعرض ===== */
+.explorer { display: grid; grid-template-columns: 300px 1fr; gap: 16px; margin-top: 16px; height: 640px; }
+.side { padding: 14px; display: flex; flex-direction: column; min-height: 0; }
+.fld { display: block; margin-bottom: 12px; }
+.fld span { display: block; font-size: .88rem; font-weight: 700; color: var(--navy); margin-bottom: 5px; }
+.fld input, .fld select {
+  width: 100%; padding: 9px 11px; border: 1px solid #cbd5e1; border-radius: 9px;
+  font: inherit; font-size: .95rem; color: var(--ink); background: #fff;
+}
+.fld input:focus, .fld select:focus { outline: 2px solid var(--blue); outline-offset: 0; border-color: var(--blue); }
+.res-hd { display: flex; justify-content: space-between; align-items: center; font-size: .82rem; color: #64748b; padding: 2px 2px 6px; border-bottom: 1px solid var(--line); }
+.link { border: 0; background: none; color: var(--blue-d); font: inherit; font-weight: 700; cursor: pointer; padding: 2px 4px; }
+.link:hover { text-decoration: underline; }
+.results { list-style: none; margin: 0; padding: 0; overflow-y: auto; flex: 1; min-height: 0; }
+.results li button {
+  display: block; width: 100%; text-align: right; border: 0; border-bottom: 1px solid #f1f5f9; background: none;
+  padding: 8px 6px; font: inherit; cursor: pointer; border-radius: 6px;
+}
+.results li button:hover, .results li button:focus-visible { background: #f0f9ff; outline: none; }
+.results li button.on { background: #e0f2fe; }
+.results .n { display: block; font-weight: 700; color: var(--ink); font-size: .95rem; }
+.results .s { display: block; font-size: .8rem; color: #64748b; margin-top: 1px; }
+.results .empty { padding: 16px 4px; color: #64748b; font-size: .9rem; }
+.map-wrap { overflow: hidden; position: relative; }
+#map { width: 100%; height: 100%; }
+
+/* ===== popup ===== */
+.pp { width: 100%; border-collapse: collapse; font-family: var(--font); direction: rtl; }
+.pp th, .pp td { padding: 6px 8px; border-bottom: 1px solid #f1f5f9; text-align: right; vertical-align: top; font-size: .9rem; }
+.pp th { color: var(--navy); font-weight: 700; white-space: nowrap; width: 38%; background: #f8fafc; }
+.pp td { color: var(--ink); }
+.esri-popup__main-container, .esri-popup__header-title { font-family: var(--font); }
+
+/* ===== شاشات صغيرة ===== */
+@media (max-width: 1000px) {
+  .chart { grid-template-columns: 1fr; }
+}
+@media (max-width: 800px) {
+  body { padding: 10px; }
+  .cards { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .hdr { padding: 12px 16px 18px; }
+  .hdr h1 { font-size: 1.3rem; }
+  .explorer { grid-template-columns: 1fr; height: auto; }
+  .side { max-height: 360px; }
+  .map-wrap { height: 480px; }
+  .num { font-size: 1.75rem; }
+}
