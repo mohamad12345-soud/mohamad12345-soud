@@ -6,6 +6,9 @@
 <meta name="theme-color" content="#0c4a6e">
 <title>دليل التجمعات السكانية الفلسطينية 2026</title>
 <link rel="stylesheet" href="https://js.arcgis.com/4.34/esri/themes/light/main.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap">
 <link rel="stylesheet" href="app.css">
 </head>
 <body>
@@ -19,13 +22,21 @@
         <p>المرجع الوطني الموحد للتجمعات السكانية الفلسطينية وحدودها ومسمياتها ورموزها الوطنية</p>
       </div>
     </div>
+    <div class="actions">
+      <span class="live" title="الأرقام تُقرأ مباشرة من خدمات ArcGIS"><i></i>بيانات مباشرة<small id="liveTime"></small></span>
+      <button id="tourBtn" class="act primary" type="button" disabled><span aria-hidden="true">▶</span><b>جولة عرض</b></button>
+      <button id="fsBtn" class="act icon-only" type="button" title="ملء الشاشة" aria-label="ملء الشاشة">⛶</button>
+    </div>
   </header>
+
+  <div class="panel">
 
   <nav class="tabs" role="tablist" aria-label="أقسام التطبيق">
     <button class="tab map-only" role="tab" data-tab="map" type="button"><span aria-hidden="true">🗺️</span>الخريطة</button>
     <button class="tab" role="tab" data-tab="dash" type="button"><span aria-hidden="true">📊</span>لوحة المعلومات</button>
     <button class="tab" role="tab" data-tab="search" type="button"><span aria-hidden="true">🔍</span>البحث</button>
     <button class="tab" role="tab" data-tab="data" type="button"><span aria-hidden="true">⬇️</span>البيانات</button>
+    <button class="tab" role="tab" data-tab="about" type="button"><span aria-hidden="true">🏛️</span>من نحن</button>
   </nav>
 
   <aside class="side">
@@ -37,6 +48,7 @@
         <div class="card c3"><div class="icon">⛺</div><div class="num" data-to="173">173</div><div class="label">عدد التجمعات البدوية</div></div>
         <div class="card c4"><div class="icon">🤝</div><div class="num" data-to="16">16</div><div class="label">الجهات المشاركة</div></div>
       </div>
+      <div id="regions" class="regions"></div>
       <div class="sec-hd">
         <h2>التجمعات حسب المحافظة</h2>
         <span class="hint">اضغط على محافظة لعرضها</span>
@@ -82,10 +94,65 @@
       </ul>
       <p class="foot">دولة فلسطين · الفريق الوطني لإعداد دليل التجمعات الفلسطينية</p>
     </section>
+    <!-- من نحن -->
+    <section class="pane" data-pane="about">
+      <div class="sec-hd"><h2>عن المنصة والدليل</h2></div>
+      <div class="about">
+        <p>يمثل توفير البيانات والمعلومات المكانية والإحصائية الدقيقة والموثوقة ركيزة أساسية في بناء السياسات الوطنية واتخاذ القرارات السليمة، وداعماً رئيسياً لجهود التخطيط والتنمية وتعزيز كفاءة إدارة الموارد على المستوى الوطني.</p>
+        <p>وتأتي المنصة التفاعلية لدليل التجمعات السكانية الفلسطينية 2026 في إطار جهود دولة فلسطين لتطوير منظومة البيانات الوطنية وتعزيز التكامل الشامل بين البيانات الإحصائية والجغرافية والإدارية؛ حيث توفر المنصة مرجعاً وطنياً تفاعلياً وموحداً للتجمعات السكانية، مسمياتها، رموزها، وحدودها الجغرافية لخدمة كافة المؤسسات والجهات ذات العلاقة.</p>
+        <p>وجاءت هذه المنصة والدليل استجابةً للتغيرات العمرانية والإدارية والجغرافية التي شهدتها فلسطين، وبما يواكب التطورات المتسارعة في نظم المعلومات الجغرافية والتقنيات الرقمية الحديثة. كما يُشكل الدليل أساساً مكانياً للتحضير <strong>للتعداد العام للسكان والمساكن والمنشآت 2027</strong>، ولدعم تنفيذ المسوح والدراسات التنموية على مختلف المستويات.</p>
+        <p>إن توحيد أسماء التجمعات السكانية ورموزها وحدودها وربطها بالمرجعيات المكانية الوطنية عبر هذا الدليل يعزز تبادل البيانات بين المؤسسات، ويرفع من جودة المعلومات الجغرافية لدعم بناء قواعد بيانات وطنية متكاملة ومستدامة.</p>
+      </div>
+
+      <div class="sec-hd"><h2>أعضاء الفريق الوطني</h2><span class="hint">بقرار مجلس الوزراء · 15 جهة</span></div>
+      <ul class="team">
+          <li><b>هبة خضر</b><span>الأمانة العامة لمجلس الوزراء</span></li>
+          <li><b>باسم حدايدة</b><span>وزارة الحكم المحلي</span><em>مقرر الفريق</em></li>
+          <li><b>مصعب أبو الهيجاء</b><span>الجهاز المركزي للإحصاء الفلسطيني</span><em>نائب المقرر</em></li>
+          <li><b>وفاء أبو لطيفة</b><span>وزارة الداخلية</span></li>
+          <li><b>نفين حجازي</b><span>وزارة المالية والتخطيط</span></li>
+          <li><b>صابرين فلاحين</b><span>وزارة الصناعة</span></li>
+          <li><b>مرح المصري</b><span>وزارة الأشغال العامة والإسكان</span></li>
+          <li><b>مجد سودة</b><span>وزارة الزراعة</span></li>
+          <li><b>محمد فليان</b><span>سلطة الأراضي</span></li>
+          <li><b>بسام الوحيدي</b><span>دائرة شؤون اللاجئين</span></li>
+          <li><b>شاهر أبو دغش</b><span>لجنة الانتخابات المركزية</span></li>
+          <li><b>عيسى الزبون</b><span>معهد الأبحاث التطبيقية (أريج)</span></li>
+          <li><b>ماجد أبو قبع</b><span>مكتب الأمم المتحدة (UNOCHA)</span></li>
+          <li><b>تغريد نجار، ليلى أبو بكر</b><span>برنامج الأمم المتحدة (UN-Habitat)</span></li>
+          <li><b>خديجة زهران</b><span>الهيئة المستقلة لحقوق الإنسان</span></li>
+      </ul>
+
+      <div class="sec-hd"><h2>أعضاء الفريق الفني</h2><span class="hint">7 أعضاء</span></div>
+      <ul class="team tech">
+          <li><b>مصعب أبو الهيجاء</b><span>الجهاز المركزي للإحصاء الفلسطيني</span><em>مقرر الفريق</em></li>
+          <li><b>رهام دار علي</b><span>الجهاز المركزي للإحصاء الفلسطيني</span></li>
+          <li><b>امتثال الشعيبي</b><span>الجهاز المركزي للإحصاء الفلسطيني</span></li>
+          <li><b>شاهر أبو دغش</b><span>لجنة الانتخابات المركزية</span></li>
+          <li><b>محمد فليان</b><span>سلطة الأراضي</span></li>
+          <li><b>منتصر غزالة</b><span>وزارة الحكم المحلي</span></li>
+          <li><b>إياد أبو عطا الله</b><span>وزارة الحكم المحلي</span></li>
+      </ul>
+      <p class="foot">دولة فلسطين · الفريق الوطني لإعداد دليل التجمعات الفلسطينية</p>
+    </section>
   </aside>
+  </div>
 
   <main class="map-wrap">
     <div id="map"></div>
+    <div id="tip" class="tip" hidden></div>
+    <div id="spot" class="spot" hidden>
+      <button id="spotClose" class="spot-x" type="button" aria-label="إلغاء اختيار المحافظة">×</button>
+      <div class="spot-k">محافظة</div>
+      <div id="spotName" class="spot-name"></div>
+      <div class="spot-grid">
+        <div><b id="spotCount">—</b><span>تجمع سكاني</span></div>
+        <div><b id="spotShare">—</b><span>من المجموع</span></div>
+        <div><b id="spotRank">—</b><span>الترتيب</span></div>
+        <div><b id="spotArea">—</b><span>كم² تقريباً</span></div>
+      </div>
+      <div id="spotTour" class="spot-tour" hidden><span id="spotStep"></span><i><em id="spotProg"></em></i></div>
+    </div>
   </main>
 </div>
 

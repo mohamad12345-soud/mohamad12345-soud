@@ -211,8 +211,7 @@ require([
       item.panel = { content: "legend", open: false };
     }
   });
-  var wide = window.matchMedia("(min-width: 1300px)").matches;
-  view.ui.add(new Expand({ view: view, content: layerList, expandTooltip: "الطبقات ومفتاح الخريطة", expanded: wide, group: "tl", expandIcon: "layers" }), "top-left");
+  view.ui.add(new Expand({ view: view, content: layerList, expandTooltip: "الطبقات ومفتاح الخريطة", group: "tl", expandIcon: "layers" }), "top-left");
   view.ui.add(new Expand({ view: view, content: new BasemapGallery({ view: view }), expandTooltip: "الخريطة الأساس", group: "tl", expandIcon: "basemap" }), "top-left");
 
   // تحميل عامل حساب المساحة للـ popup
@@ -267,7 +266,10 @@ require([
       sel.appendChild(o);
     });
     drawChart();
+    renderRegions();
     renderResults();
+    $("tourBtn").disabled = false;
+    $("liveTime").textContent = "آخر تحديث " + new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
   }).catch(function (err) {
     console.error(err);
     $("chart").innerHTML = "";
@@ -293,6 +295,7 @@ require([
       b.appendChild(tr);
       b.appendChild(el("span", "vl", fmt(g.count)));
       b.addEventListener("click", function () {
+        stopTour();
         var code = state.gov === g.code ? "" : g.code;
         setGov(code, true);
         if (code) setTab(isMobile() ? "map" : "search");
@@ -348,6 +351,7 @@ require([
   }
 
   // ===== فلتر المحافظة =====
+  // zoom: true = تقريب لمقياس تظهر فيه التجمعات، "fit" = عرض المحافظة كاملة (للجولة)
   function setGov(code, zoom) {
     state.gov = code;
     $("gov").value = code;
@@ -355,18 +359,22 @@ require([
     syncChart();
     renderResults();
     if (govHighlight) { govHighlight.remove(); govHighlight = null; }
-    if (!code) return;
-    layers.governorates.queryFeatures({ where: "GOV_CODE = '" + code.replace(/'/g, "''") + "'", returnGeometry: true, outFields: ["OBJECTID"], outSpatialReference: view.spatialReference })
+    showSpot(code);
+    if (!code) return Promise.resolve();
+    return layers.governorates.queryFeatures({ where: "GOV_CODE = '" + code.replace(/'/g, "''") + "'", returnGeometry: true, outFields: ["OBJECTID"], outSpatialReference: view.spatialReference })
       .then(function (r) {
         var f = r.features[0];
         if (!f || state.gov !== code) return;
+        var km2 = geodeticAreaOperator.isLoaded() ? geodeticAreaOperator.execute(f.geometry, { unit: "square-kilometers" }) : 0;
+        $("spotArea").textContent = km2 > 0 ? fmt(km2) : "—";
         view.whenLayerView(layers.governorates).then(function (lv) {
           if (state.gov === code) govHighlight = lv.highlight(f);
         });
         if (!zoom) return;
         // التقريب على المحافظة ثم التأكد أن التجمعات ظاهرة (طبقة التجمعات تظهر تحت مقياس معيّن فقط)
         var ext = f.geometry.extent.expand(1.1);
-        view.goTo(ext).then(function () {
+        return view.goTo(ext, zoom === "fit" ? { duration: 1800 } : undefined).then(function () {
+          if (zoom === "fit") return;
           var maxS = layers.localities.minScale;
           if (maxS && view.scale > maxS * 0.97) return view.goTo({ target: ext.center, scale: maxS * 0.97 });
         }).catch(function () {});
@@ -380,6 +388,7 @@ require([
     });
   }
   function selectLocality(l) {
+    stopTour();
     state.selected = l.oid;
     syncSelected();
     if (isMobile()) setTab("map");
@@ -430,8 +439,9 @@ require([
       if (first) first.click();
     }
   });
-  $("gov").addEventListener("change", function (e) { setGov(e.target.value, true); });
+  $("gov").addEventListener("change", function (e) { stopTour(); setGov(e.target.value, true); });
   $("reset").addEventListener("click", function () {
+    stopTour();
     $("q").value = "";
     state.q = "";
     state.selected = null;
@@ -445,6 +455,153 @@ require([
   reactiveUtils.watch(function () { return view.popup && view.popup.visible; }, function (vis) {
     if (!vis && locHighlight) { locHighlight.remove(); locHighlight = null; state.selected = null; syncSelected(); }
   });
+
+  // =====================================================================
+  // واجهة الحاسوب: التوزيع الجغرافي، بطاقة المحافظة، التلميح، الجولة، ملء الشاشة
+  // =====================================================================
+  function total() { return govs.reduce(function (s, g) { return s + g.count; }, 0); }
+  function pct(n) { var t = total(); return t ? fmt(n / t * 100, 1) + "%" : "—"; }
+
+  function renderRegions() {
+    var wb = 0, gz = 0;
+    govs.forEach(function (g) { if (g.code.charAt(0) === "2") gz += g.count; else wb += g.count; });
+    var box = $("regions");
+    box.innerHTML = "";
+    var rg = el("div", "rg");
+    var a = el("div", "wb"); a.appendChild(el("b", null, fmt(wb))); a.appendChild(el("span", null, "الضفة الغربية · " + pct(wb)));
+    var b = el("div", "gz"); b.appendChild(el("b", null, fmt(gz))); b.appendChild(el("span", null, "قطاع غزة · " + pct(gz)));
+    rg.appendChild(a); rg.appendChild(b);
+    var split = el("div", "split"), i1 = el("i"), i2 = el("i");
+    i1.style.flexGrow = 1; i2.style.flexGrow = 1;
+    split.appendChild(i1); split.appendChild(i2);
+    box.appendChild(rg); box.appendChild(split);
+    requestAnimationFrame(function () { requestAnimationFrame(function () { i1.style.flexGrow = wb; i2.style.flexGrow = gz; }); });
+  }
+
+  function showSpot(code) {
+    var g = govs.filter(function (x) { return x.code === code; })[0];
+    if (!g) { $("spot").hidden = true; return; }
+    var rank = govs.slice().sort(function (x, y) { return y.count - x.count; }).indexOf(g) + 1;
+    $("spotName").textContent = g.name;
+    $("spotShare").textContent = pct(g.count);
+    $("spotRank").textContent = rank + " من " + govs.length;
+    $("spotArea").textContent = "…";
+    $("spot").hidden = false;
+    countUp($("spotCount"), g.count);
+  }
+  $("spotClose").addEventListener("click", function () { stopTour(); setGov("", false); });
+
+  // المحافظات على الحاسوب: تلميح عند المرور + الضغط يختار المحافظة (على الموبايل يبقى الـ popup)
+  function syncGovPopup() { layers.governorates.popupEnabled = isMobile(); }
+  var tip = $("tip"), hoverOid = null, hoverHl = null, moveTimer = null;
+  function clearHover() {
+    tip.hidden = true; hoverOid = null;
+    if (hoverHl) { hoverHl.remove(); hoverHl = null; }
+    view.container.style.cursor = "";
+  }
+  view.on("pointer-move", function (e) {
+    if (isMobile()) return;
+    clearTimeout(moveTimer);
+    moveTimer = setTimeout(function () {
+      view.hitTest(e, { include: [layers.governorates] }).then(function (r) {
+        var hit = r.results.filter(function (x) { return x.graphic && x.graphic.layer === layers.governorates; })[0];
+        if (!hit) { clearHover(); return; }
+        var a = hit.graphic.attributes, code = a.GOV_CODE;
+        tip.innerHTML = "";
+        tip.appendChild(document.createTextNode(a.NAME_AR));
+        tip.appendChild(el("b", null, fmt(govCounts[code] || 0) + " تجمع"));
+        tip.style.left = e.x + "px"; tip.style.top = e.y + "px";
+        tip.hidden = false;
+        view.container.style.cursor = "pointer";
+        var oid = a.OBJECTID;
+        if (oid !== hoverOid) {
+          hoverOid = oid;
+          if (hoverHl) hoverHl.remove();
+          view.whenLayerView(layers.governorates).then(function (lv) { if (hoverOid === oid) hoverHl = lv.highlight(oid); });
+        }
+      }).catch(function () {});
+    }, 30);
+  });
+  view.on("pointer-leave", clearHover);
+  view.on("click", function (e) {
+    if (isMobile()) return;
+    view.hitTest(e, { include: [layers.governorates] }).then(function (r) {
+      var hit = r.results.filter(function (x) { return x.graphic && x.graphic.layer === layers.governorates; })[0];
+      if (!hit) return;
+      stopTour();
+      clearHover();
+      setGov(hit.graphic.attributes.GOV_CODE, true);
+      setTab("dash");
+    });
+  });
+
+  // المساحة المحجوزة للّوحة العائمة: التقريب يتمركز بالجزء الظاهر من الخريطة
+  function syncPadding() {
+    var side = isMobile() ? 0 : document.querySelector(".panel").getBoundingClientRect().width + 32;
+    view.padding = { right: side };
+    view.ui.padding = { top: 12, right: 12 + side, bottom: 12, left: 12 };
+  }
+
+  // جولة العرض: تمرّ على المحافظات من الشمال للجنوب
+  var TOUR_MS = 7000, tour = null;
+  function stopTour() {
+    if (!tour) return;
+    clearTimeout(tour.timer); cancelAnimationFrame(tour.raf);
+    tour = null;
+    var b = $("tourBtn");
+    b.classList.remove("on");
+    b.querySelector("span").textContent = "▶";
+    b.querySelector("b").textContent = "جولة عرض";
+    $("spotTour").hidden = true;
+  }
+  function tourStep() {
+    if (!tour) return;
+    if (tour.i >= govs.length) {
+      stopTour();
+      setGov("", false);
+      if (home.viewpoint) view.goTo(home.viewpoint, { duration: 1500 }).catch(function () {});
+      return;
+    }
+    var g = govs[tour.i], my = tour;
+    setGov(g.code, "fit").then(function () {
+      if (tour !== my) return;
+      $("spotTour").hidden = false;
+      $("spotStep").textContent = (my.i + 1) + " / " + govs.length;
+      var prog = $("spotProg"), t0 = performance.now();
+      (function anim(now) {
+        if (tour !== my) return;
+        prog.style.width = Math.min((now - t0) / TOUR_MS * 100, 100) + "%";
+        if (now - t0 < TOUR_MS) my.raf = requestAnimationFrame(anim);
+      })(t0);
+      my.timer = setTimeout(function () { if (tour === my) { my.i++; tourStep(); } }, TOUR_MS);
+    });
+  }
+  $("tourBtn").addEventListener("click", function () {
+    if (tour) { stopTour(); return; }
+    view.closePopup();
+    setTab("dash");
+    tour = { i: 0, timer: null, raf: null };
+    var b = $("tourBtn");
+    b.classList.add("on");
+    b.querySelector("span").textContent = "■";
+    b.querySelector("b").textContent = "إيقاف الجولة";
+    tourStep();
+  });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") stopTour(); });
+
+  // ملء الشاشة
+  $("fsBtn").addEventListener("click", function () {
+    if (document.fullscreenElement) document.exitFullscreen();
+    else if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(function () {});
+  });
+  document.addEventListener("fullscreenchange", function () {
+    $("fsBtn").textContent = document.fullscreenElement ? "🗗" : "⛶";
+  });
+
+  syncGovPopup();
+  view.when(syncPadding);
+  window.addEventListener("resize", syncPadding);
+  mq.addEventListener("change", function () { syncGovPopup(); syncPadding(); if (isMobile()) { stopTour(); clearHover(); } });
 
   // ===== عدّاد الكروت =====
   function countUp(n, to) {
