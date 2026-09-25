@@ -198,6 +198,7 @@ require([
     popup: { dockEnabled: false, dockOptions: { buttonEnabled: false } }
   });
   view.ui.padding = { top: 12, right: 12, bottom: 12, left: 12 };
+  window.appView = view; // للفحص من الـ console
 
   var home = new Home({ view: view });
   view.ui.add(home, "top-right");
@@ -375,12 +376,37 @@ require([
         if (!zoom) return;
         // التقريب على المحافظة ثم التأكد أن التجمعات ظاهرة (طبقة التجمعات تظهر تحت مقياس معيّن فقط)
         var ext = f.geometry.extent.expand(1.1);
-        return view.goTo(ext, zoom === "fit" ? { duration: 1800 } : undefined).then(function () {
-          if (zoom === "fit") return;
-          var maxS = layers.localities.minScale;
-          if (maxS && view.scale > maxS * 0.97) return view.goTo({ target: ext.center, scale: maxS * 0.97 });
-        }).catch(function () {});
+        var maxS = zoom === "fit" ? 0 : layers.localities.minScale * 0.97;
+        return flyTo(ext, maxS).catch(function () {});
       });
+  }
+
+  // ===== انتقال سلس ("طيران") =====
+  // المقياس اللي بيعرض الامتداد كامل ضمن الجزء الظاهر من الخريطة (بعد حجز اللوحة/البطاقة)
+  function scaleToFit(ext) {
+    var pad = view.padding || {};
+    var w = Math.max(view.width - (pad.left || 0) - (pad.right || 0), 50);
+    var h = Math.max(view.height - (pad.top || 0) - (pad.bottom || 0), 50);
+    var res = Math.max(ext.width / w, ext.height / h);
+    return res * view.scale / view.resolution;
+  }
+  // يطير للهدف: إذا الهدف بعيد عن الشاشة الحالية، يبعّد شوي أولاً (نظرة من فوق) ثم يقرّب بنعومة
+  function flyTo(ext, maxScale) {
+    var endScale = scaleToFit(ext);
+    if (maxScale && endScale > maxScale) endScale = maxScale;
+    var target = ext.center;
+    var from = view.center;
+    var dist = Math.sqrt(Math.pow(target.x - from.x, 2) + Math.pow(target.y - from.y, 2));
+    var visible = Math.max(view.extent.width, view.extent.height);
+    var end = { target: target, scale: endScale };
+    if (dist < visible * 0.6) return view.goTo(end, { duration: 1400, easing: "in-out-cubic" });
+    // مقياس المرحلة الأولى: بيشمل النقطتين معاً
+    var both = { width: Math.abs(target.x - from.x) * 1.6, height: Math.abs(target.y - from.y) * 1.6 };
+    var midScale = Math.max(view.scale, endScale, scaleToFit(both));
+    var mid = { target: { type: "point", spatialReference: view.spatialReference, x: (from.x + target.x) / 2, y: (from.y + target.y) / 2 }, scale: midScale };
+    return view.goTo(mid, { duration: 1100, easing: "in-cubic" }).then(function () {
+      return view.goTo(end, { duration: 1500, easing: "out-cubic" });
+    });
   }
 
   // ===== اختيار تجمع: تقريب + popup + تمييز =====
@@ -399,9 +425,8 @@ require([
         var f = r.features[0];
         if (!f) return;
         var ext = f.geometry.extent.expand(1.6);
-        return view.goTo(ext).then(function () {
-          if (view.scale > LOCALITY_ZOOM_SCALE) return view.goTo({ target: ext.center, scale: LOCALITY_ZOOM_SCALE });
-        }).then(function () {
+        view.closePopup();
+        return flyTo(ext, LOCALITY_ZOOM_SCALE).then(function () {
           if (locHighlight) locHighlight.remove();
           view.whenLayerView(layers.localities).then(function (lv) { locHighlight = lv.highlight(l.oid); });
           view.openPopup({ features: [f], location: f.geometry.extent.center });
@@ -450,7 +475,7 @@ require([
     if (locHighlight) { locHighlight.remove(); locHighlight = null; }
     view.closePopup();
     setGov("", false);
-    if (home.viewpoint) view.goTo(home.viewpoint).catch(function () {});
+    if (home.viewpoint) view.goTo(home.viewpoint, { duration: 1400, easing: "in-out-cubic" }).catch(function () {});
   });
 
   // إزالة تمييز التجمع عند إغلاق الـ popup
@@ -482,7 +507,7 @@ require([
 
   function showSpot(code) {
     var g = govs.filter(function (x) { return x.code === code; })[0];
-    if (!g) { $("spot").hidden = true; return; }
+    if (!g) { $("spot").hidden = true; syncPadding(); return; }
     var rank = govs.slice().sort(function (x, y) { return y.count - x.count; }).indexOf(g) + 1;
     $("spotName").textContent = g.name;
     $("spotShare").textContent = pct(g.count);
@@ -490,11 +515,12 @@ require([
     $("spotArea").textContent = "…";
     $("spot").hidden = false;
     countUp($("spotCount"), g.count);
+    syncPadding();
   }
   $("spotClose").addEventListener("click", function () { stopTour(); setGov("", false); });
 
-  // المحافظات على الحاسوب: تلميح عند المرور + الضغط يختار المحافظة (على الموبايل يبقى الـ popup)
-  function syncGovPopup() { layers.governorates.popupEnabled = isMobile(); }
+  // المحافظات: الضغط يختار المحافظة ويظهر بطاقتها (بدل الـ popup) + تلميح عند المرور على الحاسوب
+  function syncGovPopup() { layers.governorates.popupEnabled = false; }
   var tip = $("tip"), hoverOid = null, hoverHl = null, moveTimer = null;
   function clearHover() {
     tip.hidden = true; hoverOid = null;
@@ -526,21 +552,22 @@ require([
   });
   view.on("pointer-leave", clearHover);
   view.on("click", function (e) {
-    if (isMobile()) return;
     view.hitTest(e, { include: [layers.governorates] }).then(function (r) {
       var hit = r.results.filter(function (x) { return x.graphic && x.graphic.layer === layers.governorates; })[0];
       if (!hit) return;
       stopTour();
       clearHover();
       setGov(hit.graphic.attributes.GOV_CODE, true);
-      setTab("dash");
+      if (!isMobile()) setTab("dash");
     });
   });
 
   // المساحة المحجوزة للّوحة العائمة: التقريب يتمركز بالجزء الظاهر من الخريطة
+  // على الموبايل: بطاقة المحافظة تغطي أسفل الخريطة، فنحجز ارتفاعها
   function syncPadding() {
     var side = isMobile() ? 0 : document.querySelector(".panel").getBoundingClientRect().width + 32;
-    view.padding = { right: side };
+    var spot = $("spot"), bottom = isMobile() && !spot.hidden ? spot.offsetHeight + 36 : 0;
+    view.padding = { right: side, bottom: bottom };
     view.ui.padding = { top: 12, right: 12 + side, bottom: 12, left: 12 };
   }
 
@@ -561,13 +588,13 @@ require([
     if (tour.i >= govs.length) {
       stopTour();
       setGov("", false);
-      if (home.viewpoint) view.goTo(home.viewpoint, { duration: 1500 }).catch(function () {});
+      if (home.viewpoint) view.goTo(home.viewpoint, { duration: 1800, easing: "in-out-cubic" }).catch(function () {});
       return;
     }
     var g = govs[tour.i], my = tour;
     setGov(g.code, "fit").then(function () {
       if (tour !== my) return;
-      $("spotTour").hidden = false;
+      if ($("spotTour").hidden) { $("spotTour").hidden = false; syncPadding(); }
       $("spotStep").textContent = (my.i + 1) + " / " + govs.length;
       var prog = $("spotProg"), t0 = performance.now();
       (function anim(now) {
@@ -581,7 +608,7 @@ require([
   $("tourBtn").addEventListener("click", function () {
     if (tour) { stopTour(); return; }
     view.closePopup();
-    setTab("dash");
+    setTab(isMobile() ? "map" : "dash");
     tour = { i: 0, timer: null, raf: null };
     var b = $("tourBtn");
     b.classList.add("on");
@@ -603,7 +630,7 @@ require([
   syncGovPopup();
   view.when(syncPadding);
   window.addEventListener("resize", syncPadding);
-  mq.addEventListener("change", function () { syncGovPopup(); syncPadding(); if (isMobile()) { stopTour(); clearHover(); } });
+  mq.addEventListener("change", function () { syncPadding(); if (isMobile()) clearHover(); });
 
   // ===== عدّاد الكروت =====
   function countUp(n, to) {
