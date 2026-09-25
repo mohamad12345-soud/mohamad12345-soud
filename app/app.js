@@ -160,6 +160,20 @@ require([
     };
   }
 
+  // ليبل التجمعات: الأصلي (من lyrx) يظهر بس تحت 1:72,000. منزيد مستوى أبعد بنفس الشكل وخط أصغر،
+  // حتى تبين الأسماء على مقياس المحافظة (الخريطة بتخفي الأسماء المتراكبة لحالها).
+  var LOCALITY_FAR_LABEL_SIZE = 11;
+  function localityLabels(c) {
+    var near = c.labelingInfo[0];
+    if (!near || !near.minScale || !c.minScale) return c.labelingInfo;
+    var far = JSON.parse(JSON.stringify(near));
+    far.symbol.font.size = LOCALITY_FAR_LABEL_SIZE;
+    far.symbol.haloSize = 1;
+    far.minScale = c.minScale;
+    far.maxScale = near.minScale;
+    return c.labelingInfo.concat([far]);
+  }
+
   // ===== الطبقات من layers-config.js =====
   var layers = {};
   var ordered = window.APP_LAYERS.filter(function (c) {
@@ -183,6 +197,7 @@ require([
     if (pt) props.popupTemplate = pt;
     // حدود المحافظات وحدود فلسطين للعرض فقط (لا تغطي popup التجمعات)
     if (c.id === "govBorders" || c.id === "border") props.legendEnabled = c.id === "border";
+    if (c.id === "localities") props.labelingInfo = localityLabels(c);
     var lyr = new FeatureLayer(props);
     layers[c.id] = lyr;
     return lyr;
