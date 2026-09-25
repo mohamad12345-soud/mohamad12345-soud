@@ -239,7 +239,11 @@ require([
   var govQ = layers.governorates.queryFeatures({ where: "1=1", outFields: ["NAME_AR", "GOV_CODE"], returnGeometry: false });
   var locQ = layers.localities.queryFeatures({ where: "1=1", outFields: LOC_FIELDS, returnGeometry: false, num: 2000 });
 
-  Promise.all([govQ, locQ]).then(function (res) {
+  // عدد التجمعات للكرت: يُقرأ من الخدمة مباشرة (أي تعديل على الطبقة ينعكس فوراً)
+  var cntQ = layers.localities.queryFeatureCount({ where: "1=1" });
+
+  Promise.all([govQ, locQ, cntQ]).then(function (res) {
+    countUp($("locCount"), res[2]);
     res[1].features.forEach(function (f) {
       var a = f.attributes;
       var name = a.Locality_Name_Ar || a.Loc_Name;
@@ -269,6 +273,7 @@ require([
     $("chart").innerHTML = "";
     $("chart").appendChild(el("div", "err", "تعذّر تحميل البيانات من الخادم. تأكد من الاتصال وأن الطبقات مشاركة للجميع."));
     $("results").appendChild(el("li", "empty", "تعذّر تحميل قائمة التجمعات."));
+    $("locCount").textContent = "—";
   });
 
   // ===== الشارت =====
@@ -442,8 +447,8 @@ require([
   });
 
   // ===== عدّاد الكروت =====
-  Array.prototype.forEach.call(document.querySelectorAll(".num[data-to]"), function (n) {
-    var to = +n.getAttribute("data-to"), start = null;
+  function countUp(n, to) {
+    var start = null;
     n.textContent = "0";
     function step(ts) {
       if (!start) start = ts;
@@ -452,5 +457,8 @@ require([
       if (p < 1) requestAnimationFrame(step);
     }
     requestAnimationFrame(step);
+  }
+  Array.prototype.forEach.call(document.querySelectorAll(".num[data-to]"), function (n) {
+    countUp(n, +n.getAttribute("data-to"));
   });
 });
