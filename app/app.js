@@ -211,7 +211,7 @@ require([
       item.panel = { content: "legend", open: false };
     }
   });
-  var wide = window.matchMedia("(min-width: 800px)").matches;
+  var wide = window.matchMedia("(min-width: 1300px)").matches;
   view.ui.add(new Expand({ view: view, content: layerList, expandTooltip: "الطبقات ومفتاح الخريطة", expanded: wide, group: "tl", expandIcon: "layers" }), "top-left");
   view.ui.add(new Expand({ view: view, content: new BasemapGallery({ view: view }), expandTooltip: "الخريطة الأساس", group: "tl", expandIcon: "basemap" }), "top-left");
 
@@ -240,13 +240,11 @@ require([
   var locQ = layers.localities.queryFeatures({ where: "1=1", outFields: LOC_FIELDS, returnGeometry: false, num: 2000 });
 
   Promise.all([govQ, locQ]).then(function (res) {
-    // التجمعات بدون رمز (LOCCODE فارغ) هي قرى مهجرة داخل الطبقة — لا تُحسب ولا تظهر في البحث
     res[1].features.forEach(function (f) {
       var a = f.attributes;
-      if (blank(a.LOCCODE)) return;
       var name = a.Locality_Name_Ar || a.Loc_Name;
       localities.push({
-        oid: a.OBJECTID, code: a.LOCCODE, name: name, nameN: norm(name) + " " + norm(a.Loc_Name),
+        oid: a.OBJECTID, code: blank(a.LOCCODE) ? "" : a.LOCCODE.trim(), name: name, nameN: norm(name) + " " + norm(a.Loc_Name),
         nameEn: a.Locality_Name_En || "", nameEnN: norm(a.Locality_Name_En),
         gov: a.GOV_NAME, govCode: a.GOVCODE
       });
@@ -290,8 +288,9 @@ require([
       b.appendChild(tr);
       b.appendChild(el("span", "vl", fmt(g.count)));
       b.addEventListener("click", function () {
-        setGov(state.gov === g.code ? "" : g.code, true);
-        $("explorer").scrollIntoView({ behavior: "smooth", block: "start" });
+        var code = state.gov === g.code ? "" : g.code;
+        setGov(code, true);
+        if (code) setTab(isMobile() ? "map" : "search");
       });
       box.appendChild(b);
       requestAnimationFrame(function () { requestAnimationFrame(function () { fl.style.width = (g.count / max * 100) + "%"; }); });
@@ -312,7 +311,7 @@ require([
     var list = localities.filter(function (l) {
       if (state.gov && l.govCode !== state.gov) return false;
       if (!q) return true;
-      return l.nameN.indexOf(q) >= 0 || l.nameEnN.indexOf(q) >= 0 || l.code.indexOf(q) === 0;
+      return l.nameN.indexOf(q) >= 0 || l.nameEnN.indexOf(q) >= 0 || (l.code && l.code.indexOf(q) === 0);
     });
     if (q) {
       // الأسماء التي تبدأ بنص البحث أولاً
@@ -333,7 +332,9 @@ require([
       var li = el("li"), b = el("button", state.selected === l.oid ? "on" : "");
       b.type = "button";
       b.dataset.oid = l.oid;
-      b.appendChild(el("span", "n", l.name));
+      var n = el("span", "n", l.name);
+      if (!l.code) n.appendChild(el("span", "tag", "بدون رمز"));
+      b.appendChild(n);
       b.appendChild(el("span", "s", l.gov + (l.nameEn ? " · " + l.nameEn : "")));
       b.addEventListener("click", function () { selectLocality(l); });
       li.appendChild(b);
@@ -376,6 +377,7 @@ require([
   function selectLocality(l) {
     state.selected = l.oid;
     syncSelected();
+    if (isMobile()) setTab("map");
     layers.localities.queryFeatures({ objectIds: [l.oid], outFields: LOC_FIELDS, returnGeometry: true, outSpatialReference: view.spatialReference })
       .then(function (r) {
         var f = r.features[0];
@@ -390,6 +392,26 @@ require([
         });
       }).catch(function (e) { if (e && e.name !== "AbortError") console.error(e); });
   }
+
+  // ===== التبويبات =====
+  var mq = window.matchMedia("(max-width: 760px)");
+  function isMobile() { return mq.matches; }
+  function setTab(name) {
+    if (name === "map" && !isMobile()) name = "dash";
+    document.querySelector(".app").dataset.tab = name;
+    Array.prototype.forEach.call(document.querySelectorAll(".tab"), function (t) {
+      t.setAttribute("aria-selected", t.dataset.tab === name ? "true" : "false");
+    });
+    if (name === "search" && !isMobile()) $("q").focus({ preventScroll: true });
+  }
+  Array.prototype.forEach.call(document.querySelectorAll(".tab"), function (t) {
+    t.addEventListener("click", function () { setTab(t.dataset.tab); });
+  });
+  // عند الرجوع من الموبايل للشاشة العريضة لا يبقى تبويب "الخريطة" (غير موجود هناك)
+  mq.addEventListener("change", function () {
+    if (!isMobile() && document.querySelector(".app").dataset.tab === "map") setTab("dash");
+  });
+  setTab("dash");
 
   // ===== أحداث =====
   var t;
