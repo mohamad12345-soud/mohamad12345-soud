@@ -233,6 +233,16 @@ html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink); 
 .spot-grid div { background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.08); border-radius: 12px; padding: 9px 12px; }
 .spot-grid b { display: block; font-size: 1.45rem; font-weight: 800; font-variant-numeric: tabular-nums; }
 .spot-grid span { font-size: .78rem; color: #bae6fd; }
+/* جدول بطاقة المحافظة: العنوان يمين والرقم يسار */
+.spot-tbl { border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,.1); }
+.spot-tbl .tr { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 9px 14px; background: rgba(255,255,255,.05); border-bottom: 1px solid rgba(255,255,255,.07); }
+.spot-tbl .tr:nth-child(odd) { background: rgba(255,255,255,.08); }
+.spot-tbl .tr:last-child { border-bottom: 0; }
+.spot-tbl .tr > span { color: #bae6fd; font-size: .86rem; }
+.spot-tbl .tr > b { flex: none; font-size: 1.1rem; font-weight: 800; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.spot-tbl .tr > b small { margin-right: 5px; font-size: .75rem; font-weight: 600; color: #bae6fd; }
+.spot-tbl .tr.hl { background: rgba(250,204,21,.12); }
+.spot-tbl .tr.hl > b { color: #facc15; font-size: 1.35rem; }
 .spot-tour { display: flex; align-items: center; gap: 10px; margin-top: 12px; font-size: .78rem; color: #bae6fd; }
 .spot-tour[hidden] { display: none; }
 .spot-tour i { flex: 1; height: 4px; border-radius: 2px; background: rgba(255,255,255,.15); overflow: hidden; }
@@ -289,14 +299,14 @@ html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink); 
   .side { background: transparent; border: 0; flex: 1; }
   .pane { padding: 16px 18px; }
   .card { background: rgba(255,255,255,.9); }
-  .spot { left: 20px; bottom: 34px; width: 330px; }
+  .spot { left: 20px; bottom: 34px; width: 360px; }
   .spot.loc { width: 360px; }
 }
 @media (min-width: 761px) and (max-width: 1100px) {
   :root { --side: 340px; }
   .live { display: none; }
   .act b { display: none; }
-  .spot { width: 280px; }
+  .spot { width: 320px; }
 }
 
 /* =====================================================================
@@ -320,6 +330,10 @@ html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink); 
   .app:not([data-tab="map"]) .spot { display: none; }
   .spot-x { top: 8px; left: 10px; }
   .spot-name { font-size: 1.25rem; margin: 0 0 10px; }
+  .spot-tbl .tr { padding: 6px 12px; }
+  .spot-tbl .tr > span { font-size: .78rem; }
+  .spot-tbl .tr > b { font-size: .98rem; }
+  .spot-tbl .tr.hl > b { font-size: 1.15rem; }
   .spot-grid { grid-template-columns: repeat(4, 1fr); gap: 6px; }
   .spot-grid div { padding: 7px 6px; text-align: center; border-radius: 10px; }
   .spot-grid b { font-size: 1.05rem; }
