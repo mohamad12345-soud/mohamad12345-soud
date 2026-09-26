@@ -200,4 +200,4 @@
 ---
 
 # منصة بلدية بيرزيت
-انتقلت لمستودع خاص مستقل: `mohamad12345-soud/birzeit-municipality` (الرابط: `https://municipalities.gisplatform.uk`، محمية بتسجيل دخول). ملاحظاتها هناك بـ `NOTES.md`.
+انتقلت لمستودع خاص مستقل: `mohamad12345-soud/birzeit-municipality` (الرابط: `https://birzeit.gisplatform.uk`، محمية بتسجيل دخول). ملاحظاتها هناك بـ `NOTES.md`.
