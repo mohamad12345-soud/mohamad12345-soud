@@ -187,7 +187,7 @@
 | Cloudflare (Worker بملفات ثابتة) | `https://mohamad12345-soud.mohamad-flayyan.workers.dev` → الهدف: `https://pmo.gisplatform.uk` | الفرع `main` تلقائياً |
 | GitHub Pages | `https://mohamad12345-soud.github.io/mohamad12345-soud/` | الفرع المفعّل بالإعدادات |
 
-- `wrangler.jsonc`: اسم الـ Worker (`mohamad12345-soud`) لازم يضل نفسه.
+- `wrangler.jsonc`: اسم الـ Worker (`mohamad12345-soud`) لازم يضل نفسه. فيه `"previews": {}` لأنو Cloudflare بيبني معاينة لكل PR بأمر `npx wrangler preview` (بدونه بيفشل check الـ PR).
 - `.assetsignore`: شو ما بينشر (`.git`، `project/`، الملاحظات...). المنشور فعلياً: `index.html`، `app/*`، `stats/index.html`.
 - الدومين: من صفحة الـ Worker على Cloudflare → Settings → Domains & Routes → Add → Custom domain → `pmo.gisplatform.uk`.
 
