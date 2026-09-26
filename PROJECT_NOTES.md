@@ -179,6 +179,17 @@
 كرت "عدد التجمعات السكانية" صار **يُقرأ من الخدمة مباشرة** (`queryFeatureCount`) → حالياً **638**، وأي تعديل على الطبقة ينعكس فوراً.
 باقي الكروت (16 محافظة، 173 بدوية، 16 جهة) ثابتة بالكود.
 
+## 5.2 النشر
+
+| المكان | الرابط | من وين |
+|---|---|---|
+| Cloudflare (Worker بملفات ثابتة) | `https://mohamad12345-soud.mohamad-flayyan.workers.dev` → الهدف: `https://pmo.gisplatform.uk` | الفرع `main` تلقائياً |
+| GitHub Pages | `https://mohamad12345-soud.github.io/mohamad12345-soud/` | الفرع المفعّل بالإعدادات |
+
+- `wrangler.jsonc`: اسم الـ Worker (`mohamad12345-soud`) لازم يضل نفسه.
+- `.assetsignore`: شو ما بينشر (`.git`، `project/`، الملاحظات...). المنشور فعلياً: `index.html`، `app/*`، `stats/index.html`.
+- الدومين: من صفحة الـ Worker على Cloudflare → Settings → Domains & Routes → Add → Custom domain → `pmo.gisplatform.uk`.
+
 ## 6. ملاحظات عامة
 - المستخدم يتواصل بالعربية (لهجة شامية).
 - الفروع: `claude/upbeat-wright-8wmrrn` (الأساس) ثم `claude/exciting-cori-z7up22` (التطبيق).
