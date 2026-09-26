@@ -115,7 +115,6 @@ html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink); 
 .results li button.on { background: #e0f2fe; }
 .results .n { display: block; font-weight: 700; color: var(--ink); font-size: .95rem; }
 .results .s { display: block; font-size: .8rem; color: var(--muted); margin-top: 1px; }
-.results .tag { display: inline-block; margin-right: 6px; padding: 0 6px; border-radius: 6px; background: #f1f5f9; color: var(--text); font-size: .72rem; font-weight: 600; vertical-align: 2px; }
 .results .empty { padding: 16px 4px; color: var(--muted); font-size: .9rem; }
 
 /* ===== البيانات ===== */

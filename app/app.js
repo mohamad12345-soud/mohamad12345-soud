@@ -26,6 +26,9 @@ require([
   // أقصى مقياس عند التقريب على تجمع (لازم أصغر من minScale طبقة التجمعات حتى تظهر)
   var LOCALITY_ZOOM_SCALE = 60000;
 
+  // التجمعات المعتمدة: اللي إلها رمز (LOCCODE). بيستثني 6 قرى مهجرة بدون رمز
+  // (لطرون، الخلايل، دير ايوب، بيت محسير، المزار، سلبيت) — من العدّ والبحث والشارت والخريطة.
+  var LOC_WHERE = "LOCCODE > ' '";
   var LOC_FIELDS = ["OBJECTID", "LOCCODE", "Loc_Name", "Locality_Name_Ar", "Locality_Name_En", "GOV_NAME", "GOVCODE", "Notes", "Shape__Area"];
 
   // ===== أدوات مساعدة =====
@@ -200,7 +203,7 @@ require([
     if (pt) props.popupTemplate = pt;
     // حدود المحافظات وحدود فلسطين للعرض فقط (لا تغطي popup التجمعات)
     if (c.id === "govBorders" || c.id === "border") props.legendEnabled = c.id === "border";
-    if (c.id === "localities") props.labelingInfo = localityLabels(c);
+    if (c.id === "localities") { props.labelingInfo = localityLabels(c); props.definitionExpression = LOC_WHERE; }
     var lyr = new FeatureLayer(props);
     layers[c.id] = lyr;
     return lyr;
@@ -277,10 +280,10 @@ require([
 
   // ===== تحميل البيانات: المحافظات + التجمعات =====
   var govQ = layers.governorates.queryFeatures({ where: "1=1", outFields: ["NAME_AR", "GOV_CODE", "Shape__Area"], returnGeometry: false });
-  var locQ = layers.localities.queryFeatures({ where: "1=1", outFields: LOC_FIELDS, returnGeometry: false, num: 2000 });
+  var locQ = layers.localities.queryFeatures({ where: LOC_WHERE, outFields: LOC_FIELDS, returnGeometry: false, num: 2000 });
 
   // عدد التجمعات للكرت: يُقرأ من الخدمة مباشرة (أي تعديل على الطبقة ينعكس فوراً)
-  var cntQ = layers.localities.queryFeatureCount({ where: "1=1" });
+  var cntQ = layers.localities.queryFeatureCount({ where: LOC_WHERE });
 
   Promise.all([govQ, locQ, cntQ]).then(function (res) {
     countUp($("locCount"), res[2]);
@@ -385,7 +388,6 @@ require([
       b.type = "button";
       b.dataset.oid = l.oid;
       var n = el("span", "n", l.name);
-      if (!l.code) n.appendChild(el("span", "tag", "بدون رمز"));
       b.appendChild(n);
       b.appendChild(el("span", "s", l.gov + (l.nameEn ? " · " + l.nameEn : "")));
       b.addEventListener("click", function () { selectLocality(l, lastList); });
@@ -403,7 +405,7 @@ require([
     }
     state.gov = code;
     $("gov").value = code;
-    layers.localities.definitionExpression = code ? "GOVCODE = '" + code.replace(/'/g, "''") + "'" : null;
+    layers.localities.definitionExpression = LOC_WHERE + (code ? " AND GOVCODE = '" + code.replace(/'/g, "''") + "'" : "");
     syncChart();
     renderResults();
     if (govHighlight) { govHighlight.remove(); govHighlight = null; }
@@ -607,7 +609,8 @@ require([
   function showSpot(code) {
     var g = govs.filter(function (x) { return x.code === code; })[0];
     if (!g) { $("spot").hidden = true; syncPadding(); return; }
-    var rank = govs.slice().sort(function (x, y) { return y.count - x.count; }).indexOf(g) + 1;
+    // الترتيب الجغرافي من الشمال للجنوب حسب GOVCODE (جنين = 1)؛ govs مرتبة بالرمز
+    var rank = govs.indexOf(g) + 1;
     $("spotName").textContent = g.name;
     $("spotShare").textContent = pct(g.count);
     $("spotRank").textContent = rank + " من " + govs.length;
