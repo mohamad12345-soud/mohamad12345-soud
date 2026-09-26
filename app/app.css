@@ -332,5 +332,8 @@ html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink); 
   .loc-notes { margin-top: 8px; font-size: .78rem; max-height: 4.6em; overflow-y: auto; }
   .loc-nav { margin-top: 8px; padding-top: 8px; }
   .nav-b { padding: 5px 10px; font-size: .78rem; }
+  /* أدوات الخريطة السفلية (Powered by Esri) بأسفل الشاشة، مش فوق البطاقة */
+  .map-wrap .esri-ui { bottom: 0 !important; }
+  .map-wrap.card-open .esri-scale-bar { display: none; }
   .tip { display: none !important; }
 }
