@@ -8,5 +8,7 @@
   "observability": { "enabled": true },
   "assets": {
     "directory": "."
-  }
+  },
+  // مطلوب لبناء المعاينة لفروع غير main (Cloudflare بيشغّل "npx wrangler preview" عليها)
+  "previews": {}
 }
