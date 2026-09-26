@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0c4a6e">
+<title>بلدية بيرزيت — المنصة الجغرافية الذكية</title>
+<link rel="stylesheet" href="https://js.arcgis.com/4.34/esri/themes/light/main.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="theme.css">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<div class="app" data-tab="dash">
+
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo" aria-hidden="true">🏛️</span>
+      <div>
+        <h1>بلدية بيرزيت <b>· المنصة الجغرافية الذكية</b><span class="badge">نسخة تجريبية</span></h1>
+        <p>الأحواض والقطع والمباني وأعمدة الإنارة على خريطة واحدة، مع الربط بسلطة الأراضي</p>
+      </div>
+    </div>
+    <div class="actions">
+      <button id="tourBtn" class="act primary" type="button" disabled><span aria-hidden="true">▶</span><b>جولة على الأحواض</b></button>
+      <button id="fsBtn" class="act icon-only" type="button" title="ملء الشاشة" aria-label="ملء الشاشة">⛶</button>
+    </div>
+  </header>
+
+  <div class="panel">
+
+  <nav class="tabs" role="tablist" aria-label="أقسام المنصة">
+    <button class="tab map-only" role="tab" data-tab="map" type="button"><span aria-hidden="true">🗺️</span>الخريطة</button>
+    <button class="tab" role="tab" data-tab="dash" type="button"><span aria-hidden="true">📊</span>لوحة المعلومات</button>
+    <button class="tab" role="tab" data-tab="search" type="button"><span aria-hidden="true">🔍</span>البحث عن قطعة</button>
+    <button class="tab" role="tab" data-tab="about" type="button"><span aria-hidden="true">ℹ️</span>عن المنصة</button>
+  </nav>
+
+  <aside class="side">
+    <!-- لوحة المعلومات -->
+    <section class="pane" data-pane="dash">
+      <div class="cards">
+        <div class="card c1"><div class="icon">📐</div><div class="num" id="nParcels">…</div><div class="label">قطعة أرض</div></div>
+        <div class="card c2"><div class="icon">🗺️</div><div class="num" id="nBlocks">…</div><div class="label">حوض</div></div>
+        <div class="card c3"><div class="icon">🏢</div><div class="num" id="nBuildings">…</div><div class="label">مبنى</div></div>
+        <div class="card c4"><div class="icon">💡</div><div class="num" id="nPoles">…</div><div class="label">عمود إنارة</div></div>
+      </div>
+      <div id="regions" class="regions"></div>
+
+      <div class="sec-hd">
+        <h2>الأحواض</h2>
+        <span class="hint">اضغط على حوض لعرضه</span>
+      </div>
+      <div class="chart-hd"><span>الحوض</span><span></span><span>القطع</span><span>المباني</span></div>
+      <div id="chart" class="chart" aria-live="polite"><div class="loading">جارِ تحميل البيانات…</div></div>
+
+      <div class="survey">
+        <b>🗂️ الكشف الميداني على المباني</b>
+        <p>كل مبنى رح يصير إله بطاقة: الطوابق، الوحدات وإشغالها، المحلات ورخصها، ووصلة الصرف — يعبّيها الموظف من التابلت.</p>
+        <div class="prog"><i id="surveyBar"></i></div>
+        <div class="pr-l"><span id="surveyDone">0 مبنى ممسوح</span><span id="surveyTotal"></span></div>
+      </div>
+    </section>
+
+    <!-- البحث -->
+    <section class="pane" data-pane="search">
+      <div class="fld-row">
+        <label class="fld">
+          <span>الحوض</span>
+          <select id="blockSel"><option value="">كل الأحواض</option></select>
+        </label>
+        <label class="fld">
+          <span>رقم القطعة</span>
+          <input id="q" type="search" inputmode="numeric" placeholder="مثال: 205" autocomplete="off">
+        </label>
+      </div>
+      <div class="res-hd"><span id="resCount"></span><button id="reset" class="link" type="button">إعادة ضبط</button></div>
+      <ul id="results" class="results"></ul>
+    </section>
+
+    <!-- عن المنصة -->
+    <section class="pane" data-pane="about">
+      <div class="sec-hd"><h2>عن المنصة</h2></div>
+      <div class="about">
+        <p>المنصة الجغرافية لبلدية بيرزيت: خريطة واحدة تجمع الأحواض والقطع المسجّلة والمباني وأعمدة الإنارة، مع بطاقة لكل قطعة ورابط مباشر لبياناتها في سلطة الأراضي.</p>
+        <p>هذه <strong>نسخة تجريبية</strong> للعرض. المراحل القادمة: الكشف الميداني على المباني من التابلت، البلاغات، الصرف الصحي والنفايات، والربط مع النظام المالي وضريبة الأملاك.</p>
+      </div>
+      <div class="sec-hd"><h2>مصادر البيانات</h2></div>
+      <ul class="src">
+        <li><b>الأحواض والقطع وحدود البلدية</b><span>قاعدة بيانات البلدية (ArcGIS Pro) — الشبكة الفلسطينية 1923</span></li>
+        <li><b>المباني وأعمدة الكهرباء</b><span>ملف المسح الأوتوكاد للبلدية</span></li>
+        <li><b>رموز القطع (gpkey)</b><span>جدول أحواض سلطة الأراضي</span></li>
+        <li><b>الخريطة الأساس</b><span>صور الأقمار الصناعية — Esri</span></li>
+      </ul>
+      <p class="foot">بلدية بيرزيت · المنصة الجغرافية الذكية</p>
+    </section>
+  </aside>
+  </div>
+
+  <main class="map-wrap">
+    <div id="map"></div>
+    <div id="tip" class="tip" hidden></div>
+    <div id="coords" class="coords" hidden><span>الشبكة الفلسطينية</span><b id="coordsVal"></b></div>
+
+    <!-- بطاقة القطعة -->
+    <div id="loc" class="spot loc" hidden>
+      <button id="locClose" class="spot-x" type="button" aria-label="إغلاق بطاقة القطعة">×</button>
+      <div class="spot-k">قطعة أرض<span id="locCode"></span></div>
+      <div id="locName" class="spot-name"></div>
+      <div class="loc-sub"><span id="locEn"></span><button id="locBlock" class="chip" type="button"></button></div>
+      <div class="spot-grid g3">
+        <div><b id="locArea">—</b><span>دونم</span></div>
+        <div><b id="locBld">—</b><span>مبنى على القطعة</span></div>
+        <div><b id="locCover">—</b><span>نسبة البناء</span></div>
+      </div>
+      <div class="rows">
+        <div><span>المساحة</span><b id="locM2"></b></div>
+        <div><span>الإحداثيات (الشبكة الفلسطينية)</span><b id="locXY"></b></div>
+      </div>
+      <a id="locPla" class="pla" href="#" target="_blank" rel="noopener">📜 بيانات القطعة والملكية — سلطة الأراضي</a>
+      <div class="pla-note">يفتح نظام سلطة الأراضي · يتطلّب حساباً مخوّلاً</div>
+      <div class="loc-nav">
+        <button id="locPrev" class="nav-b" type="button"><span aria-hidden="true">→</span> السابق</button>
+        <span id="locPos"></span>
+        <button id="locNext" class="nav-b" type="button">التالي <span aria-hidden="true">←</span></button>
+      </div>
+    </div>
+
+    <!-- بطاقة المبنى -->
+    <div id="bld" class="spot loc bld" hidden>
+      <button id="bldClose" class="spot-x" type="button" aria-label="إغلاق بطاقة المبنى">×</button>
+      <div class="spot-k">مبنى<span id="bldCode"></span></div>
+      <div id="bldName" class="spot-name"></div>
+      <div class="loc-sub"><span id="bldSub"></span><button id="bldParcel" class="chip" type="button"></button></div>
+      <div class="spot-grid g3">
+        <div><b id="bldArea">—</b><span>م² مساحة البصمة</span></div>
+        <div><b>—</b><span>عدد الطوابق</span></div>
+        <div><b>—</b><span>الوحدات</span></div>
+      </div>
+      <div class="pending">
+        <b>بانتظار الكشف الميداني</b>
+        <ul><li>الطوابق وحالة البناء</li><li>الوحدات وإشغالها</li><li>المحلات ورخص الحرف</li><li>وصلة الصرف الصحي</li><li>صور الواجهات</li><li>الوضع المالي</li></ul>
+      </div>
+    </div>
+
+    <!-- بطاقة الحوض -->
+    <div id="spot" class="spot" hidden>
+      <button id="spotClose" class="spot-x" type="button" aria-label="إلغاء اختيار الحوض">×</button>
+      <div class="spot-k">حوض رقم <span id="spotNo"></span></div>
+      <div id="spotName" class="spot-name"></div>
+      <div class="spot-tbl">
+        <div class="tr hl"><span>عدد القطع</span><b id="spotParcels">—</b></div>
+        <div class="tr"><span>عدد المباني</span><b id="spotBld">—</b></div>
+        <div class="tr"><span>المساحة</span><b><span id="spotArea">—</span><small>دونم</small></b></div>
+        <div class="tr"><span>نسبة البناء (بصمات المباني)</span><b id="spotCover">—</b></div>
+      </div>
+      <div id="spotTour" class="spot-tour" hidden><span id="spotStep"></span><i><em id="spotProg"></em></i></div>
+    </div>
+  </main>
+</div>
+
+<script src="palgrid.js"></script>
+<script src="https://js.arcgis.com/4.34/"></script>
+<script src="app.js"></script>
+</body>
+</html>
