@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap">
-<link rel="stylesheet" href="app.css?v=5cbb87328c">
+<link rel="stylesheet" href="app.css?v=f3fddbcee2">
 </head>
 <body>
 <div class="app" data-tab="dash">
@@ -141,6 +141,23 @@
   <main class="map-wrap">
     <div id="map"></div>
     <div id="tip" class="tip" hidden></div>
+    <div id="loc" class="spot loc" hidden>
+      <button id="locClose" class="spot-x" type="button" aria-label="إغلاق بطاقة التجمع">×</button>
+      <div class="spot-k">تجمع سكاني<span id="locCode"></span></div>
+      <div id="locName" class="spot-name"></div>
+      <div class="loc-sub"><span id="locEn"></span><button id="locGov" class="chip" type="button"></button></div>
+      <div class="spot-grid g3">
+        <div><b id="locArea">—</b><span>كم² تقريباً</span></div>
+        <div><b id="locShare">—</b><span>من مساحة المحافظة</span></div>
+        <div><b id="locRank">—</b><span>ترتيبه بالمساحة</span></div>
+      </div>
+      <div id="locNotes" class="loc-notes" hidden></div>
+      <div class="loc-nav">
+        <button id="locPrev" class="nav-b" type="button"><span aria-hidden="true">→</span> السابق</button>
+        <span id="locPos"></span>
+        <button id="locNext" class="nav-b" type="button">التالي <span aria-hidden="true">←</span></button>
+      </div>
+    </div>
     <div id="spot" class="spot" hidden>
       <button id="spotClose" class="spot-x" type="button" aria-label="إلغاء اختيار المحافظة">×</button>
       <div class="spot-k">محافظة</div>
@@ -158,6 +175,6 @@
 
 <script src="layers-config.js?v=7145a548b3"></script>
 <script src="https://js.arcgis.com/4.34/"></script>
-<script src="app.js?v=036b0d3569"></script>
+<script src="app.js?v=92b24fbf46"></script>
 </body>
 </html>
