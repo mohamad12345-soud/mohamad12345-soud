@@ -1,0 +1,12 @@
+// إعداد النشر على Cloudflare (Worker بملفات ثابتة فقط — ما في كود سيرفر).
+// الاسم لازم يضل نفس اسم الـ Worker الموجود على Cloudflare حتى يتحدّث بدل ما ينعمل واحد جديد.
+// شو بينشر وشو لا: شوف ملف .assetsignore
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "mohamad12345-soud",
+  "compatibility_date": "2026-09-25",
+  "observability": { "enabled": true },
+  "assets": {
+    "directory": "."
+  }
+}
