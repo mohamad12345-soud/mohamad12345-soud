@@ -427,6 +427,9 @@ require([
   }
 
   // ===== انتقال سلس ("طيران") =====
+  // على الموبايل الحركة أسرع (الشاشة صغيرة والانتظار بينحس أطول)
+  var MOBILE_SPEED = 0.6;
+  function ms(d) { return Math.round(isMobile() ? d * MOBILE_SPEED : d); }
   // المقياس اللي بيعرض الامتداد كامل ضمن الجزء الظاهر من الخريطة (بعد حجز اللوحة/البطاقة)
   function scaleToFit(ext) {
     var pad = view.padding || {};
@@ -444,13 +447,13 @@ require([
     var dist = Math.sqrt(Math.pow(target.x - from.x, 2) + Math.pow(target.y - from.y, 2));
     var visible = Math.max(view.extent.width, view.extent.height);
     var end = { target: target, scale: endScale };
-    if (dist < visible * 0.6) return view.goTo(end, { duration: 1400, easing: "in-out-cubic" });
+    if (dist < visible * 0.6) return view.goTo(end, { duration: ms(1400), easing: "in-out-cubic" });
     // مقياس المرحلة الأولى: بيشمل النقطتين معاً
     var both = { width: Math.abs(target.x - from.x) * 1.6, height: Math.abs(target.y - from.y) * 1.6 };
     var midScale = Math.max(view.scale, endScale, scaleToFit(both));
     var mid = { target: { type: "point", spatialReference: view.spatialReference, x: (from.x + target.x) / 2, y: (from.y + target.y) / 2 }, scale: midScale };
-    return view.goTo(mid, { duration: 1100, easing: "in-cubic" }).then(function () {
-      return view.goTo(end, { duration: 1500, easing: "out-cubic" });
+    return view.goTo(mid, { duration: ms(1100), easing: "in-cubic" }).then(function () {
+      return view.goTo(end, { duration: ms(1500), easing: "out-cubic" });
     });
   }
 
@@ -575,7 +578,7 @@ require([
     closeLoc();
     view.closePopup();
     setGov("", false);
-    if (home.viewpoint) view.goTo(home.viewpoint, { duration: 1400, easing: "in-out-cubic" }).catch(function () {});
+    if (home.viewpoint) view.goTo(home.viewpoint, { duration: ms(1400), easing: "in-out-cubic" }).catch(function () {});
   });
 
 
@@ -679,10 +682,17 @@ require([
 
   // المساحة المحجوزة للّوحة العائمة: التقريب يتمركز بالجزء الظاهر من الخريطة
   // على الموبايل: بطاقة المحافظة تغطي أسفل الخريطة، فنحجز ارتفاعها
+  var lastPad = "";
   function syncPadding() {
     var side = isMobile() ? 0 : document.querySelector(".panel").getBoundingClientRect().width + 32;
     var card = !$("loc").hidden ? $("loc") : $("spot");
-    var bottom = isMobile() && !card.hidden ? card.offsetHeight + 36 : 0;
+    var open = isMobile() && !card.hidden;
+    var bottom = open ? card.offsetHeight + 36 : 0;
+    // على الموبايل: أدوات الخريطة (Powered by Esri) تنزل لأسفل الشاشة تحت البطاقة، والمقياس ينخفي وقت البطاقة مفتوحة
+    $("map").parentNode.classList.toggle("card-open", open);
+    var key = side + "|" + bottom;
+    if (key === lastPad) return; // ما في داعي نعيد ترتيب الخريطة إذا ما تغيّر شي
+    lastPad = key;
     view.padding = { right: side, bottom: bottom };
     view.ui.padding = { top: 12, right: 12 + side, bottom: 12, left: 12 };
   }
@@ -704,7 +714,7 @@ require([
     if (tour.i >= govs.length) {
       stopTour();
       setGov("", false);
-      if (home.viewpoint) view.goTo(home.viewpoint, { duration: 1800, easing: "in-out-cubic" }).catch(function () {});
+      if (home.viewpoint) view.goTo(home.viewpoint, { duration: ms(1800), easing: "in-out-cubic" }).catch(function () {});
       return;
     }
     var g = govs[tour.i], my = tour;
