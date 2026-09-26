@@ -403,3 +403,5 @@ html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink); 
   .coords { display: none; }
   .pending ul { grid-template-columns: 1fr; }
 }
+
+a.act { text-decoration: none; }
