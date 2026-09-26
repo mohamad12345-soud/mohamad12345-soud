@@ -613,7 +613,9 @@ require([
     var rank = govs.indexOf(g) + 1;
     $("spotName").textContent = g.name;
     $("spotShare").textContent = pct(g.count);
-    $("spotRank").textContent = rank + " من " + govs.length;
+    $("spotCode").textContent = g.code;
+    $("spotRank").textContent = rank;
+    $("spotOf").textContent = "من " + govs.length;
     $("spotArea").textContent = "…";
     $("spot").hidden = false;
     countUp($("spotCount"), g.count);
