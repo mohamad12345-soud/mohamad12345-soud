@@ -1,0 +1,13 @@
+# ملفات ما بتنشر على Cloudflare (نفس صيغة .gitignore)
+# مجلد git الداخلي وملفات wrangler المؤقتة
+.git
+.wrangler
+node_modules
+# ملفات العمل: الطبقات والسكربتات والملاحظات (موجودة بالمستودع، مش لازمة للموقع)
+project
+deploy
+*.md
+.gitignore
+.assetsignore
+.nojekyll
+wrangler.jsonc
