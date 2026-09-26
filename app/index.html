@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap">
-<link rel="stylesheet" href="app.css?v=79e4b9bd88">
+<link rel="stylesheet" href="app.css?v=fcf2759472">
 </head>
 <body>
 <div class="app" data-tab="dash">
@@ -162,11 +162,12 @@
       <button id="spotClose" class="spot-x" type="button" aria-label="إلغاء اختيار المحافظة">×</button>
       <div class="spot-k">محافظة</div>
       <div id="spotName" class="spot-name"></div>
-      <div class="spot-grid">
-        <div><b id="spotCount">—</b><span>تجمع سكاني</span></div>
-        <div><b id="spotShare">—</b><span>من المجموع</span></div>
-        <div><b id="spotRank">—</b><span>الترتيب (شمال ← جنوب)</span></div>
-        <div><b id="spotArea">—</b><span>كم² تقريباً</span></div>
+      <div class="spot-tbl">
+        <div class="tr"><span>رمز المحافظة</span><b id="spotCode">—</b></div>
+        <div class="tr hl"><span>عدد التجمعات داخل المحافظة</span><b id="spotCount">—</b></div>
+        <div class="tr"><span>النسبة من مجموع التجمعات</span><b id="spotShare">—</b></div>
+        <div class="tr"><span>المساحة التقريبية</span><b><span id="spotArea">—</span><small>كم²</small></b></div>
+        <div class="tr"><span>الترتيب (من الشمال للجنوب)</span><b><span id="spotRank">—</span><small id="spotOf"></small></b></div>
       </div>
       <div id="spotTour" class="spot-tour" hidden><span id="spotStep"></span><i><em id="spotProg"></em></i></div>
     </div>
@@ -175,6 +176,6 @@
 
 <script src="layers-config.js?v=7145a548b3"></script>
 <script src="https://js.arcgis.com/4.34/"></script>
-<script src="app.js?v=49facb0338"></script>
+<script src="app.js?v=41674344c7"></script>
 </body>
 </html>
