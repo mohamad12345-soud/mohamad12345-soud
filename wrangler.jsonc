@@ -1,4 +1,4 @@
-// إعداد النشر على Cloudflare: ملفات ثابتة + Worker صغير (worker/index.js) بيحمي /birzeit/ بتسجيل دخول.
+// إعداد النشر على Cloudflare (Worker بملفات ثابتة فقط — ما في كود سيرفر).
 // الاسم لازم يضل نفس اسم الـ Worker الموجود على Cloudflare حتى يتحدّث بدل ما ينعمل واحد جديد.
 // شو بينشر وشو لا: شوف ملف .assetsignore
 {
@@ -6,12 +6,8 @@
   "name": "mohamad12345-soud",
   "compatibility_date": "2026-09-25",
   "observability": { "enabled": true },
-  "main": "worker/index.js",
   "assets": {
-    "directory": ".",
-    "binding": "ASSETS",
-    // الـ Worker بيشتغل بس على منصة بيرزيت؛ الدليل وباقي الموقع ملفات ثابتة عامة زي ما هي
-    "run_worker_first": ["/birzeit", "/birzeit/*"]
+    "directory": "."
   },
   // مطلوب لبناء المعاينة لفروع غير main (Cloudflare بيشغّل "npx wrangler preview" عليها)
   "previews": {}

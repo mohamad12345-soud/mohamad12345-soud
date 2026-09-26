@@ -11,7 +11,3 @@ deploy
 .assetsignore
 .nojekyll
 wrangler.jsonc
-# بيرزيت: أدوات بناء البيانات وجدول الروابط
-birzeit/tools
-birzeit/*.csv
-worker

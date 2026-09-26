@@ -196,34 +196,8 @@
 - الفروع: `claude/upbeat-wright-8wmrrn` (الأساس) ثم `claude/exciting-cori-z7up22` (التطبيق).
 - أي تعديل على كود المستخدم: تغيير المطلوب فقط، وإرسال الكود كاملاً جاهزاً للنسخ مع جدول بالتغييرات.
 
+
 ---
 
-# مشروع ثاني: منصة بلدية بيرزيت الذكية (`birzeit/`)
-
-> الخطة الكاملة (الرؤية، الكشف الميداني، التكامل مع الغسان وضريبة الأملاك وسلطة الأراضي): `BIRZEIT_PLAN.md` عند المستخدم (خارج المستودع).
-> مؤقتاً بمجلد `birzeit/` بهذا المستودع (قرار المستخدم)؛ بعدين بتنفصل لمستودع خاص.
-> ⚠️ هذا المستودع **عام**: ما يدخل عليه أي بيانات ملكية أو أسماء أو ذمم.
-
-- **الرابط بعد الدمج بـ main:** `https://pmo.gisplatform.uk/birzeit/` (الهدف لاحقاً: `municipalities.gisplatform.uk`).
-- **نفس أسلوب الدليل:** ArcGIS Maps SDK 4.34، هيدر كحلي/ذهبي، لوحة زجاجية، بطاقات فوق الخريطة، جولة، موبايل.
-- **الألوان كلها بـ `birzeit/theme.css`** (الواجهة والخريطة) — المستخدم بيعدّلها بنفسه.
-- **البيانات:** ملفات GeoJSON ثابتة بـ `birzeit/data/` مبنية بـ:
-  `python3 birzeit/tools/build_data.py birzeat_data.lpkx All_Property_Desc_cat_395.xlsx`
-  - يفك الـ lpkx (7z) ويقرأ File Geodatabase بدون GDAL (`un7z.py`، `fgdb.py`).
-  - الطبقات: `birzeat_bourder` (الحدود)، `birzeat_block` (20 حوض)، `birzeat_parcel` (3,947 قطعة)،
-    المباني = طبقة `Polygon` بـ `Layer = 'Buildings'` (من الأوتوكاد، 2,807 بعد حذف المكرر وأقل من 5 م²)،
-    الأعمدة = `Point` بـ `Layer = 'Elecrticity_Pole'` (1,842).
-  - طبقات `birzeat_mm_final/temp` (معاملات المساحة) **فيها أسماء مالكين ومسّاحين — ما بتنشر**.
-  - كل مبنى مربوط بالقطعة اللي فيها مركزه (`b`, `p`).
-- **الإحداثيات:** الأصل فلسطين 1923 (EPSG:28191). تحويل قياسي (Cassini-Soldner + towgs84) بـ `tools/palgrid.py`
-  ونفسه بـ `birzeit/palgrid.js` للعرض. تحقّقنا: مقارنة الحدود مع حدود بيرزيت من خدمة PCBS ما فيها إزاحة منتظمة (~0.1–0.4 م).
-- **رابط سلطة الأراضي (الكوشان):** `https://plaapp.pla.pna.ps/Owners/Owners/Info?gpkey=` +
-  `GID(2) VID(5) BID(6) رقم القطعة(8) "159" "0000000"` — مستنتج من مثالين حقيقيين
-  (الطيبة 10/3 و بيرزيت 13/205) ومفحوص بـ assert بسكريبت البناء. بيرزيت: GID=13، VID=19، BID من جدول الأحواض (270–302).
-  جدول كل القطع مع الروابط: `birzeit/parcels_gpkey.csv` (**مش بالمستودع** — بـ .gitignore).
-- **الفحص المحلي:** `python3 -m http.server` بجذر المستودع وافتح `/birzeit/`.
-- **تسجيل الدخول:** `worker/index.js` (Worker قبل الملفات الثابتة لمسارات `/birzeit/*` بس — `run_worker_first` بـ `wrangler.jsonc`).
-  المستخدمين بسرّ واحد على Cloudflare: `BIRZEIT_USERS` = JSON `{user: "pbkdf2$100000$salt$hash"}`، يتولّد بـ
-  `python birzeit/tools/add_user.py user1 user2` (أو `--add '<القيمة الحالية>' new_user`). بدون السر المنصة بترجع 503 (مسكّرة).
-  كوكي موقّعة 12 ساعة؛ مفتاح التوقيع مشتق من قيمة السر، فتغييره بيطلّع الكل. محاولات الدخول بتنسجّل بـ Workers Logs.
-  ⚠️ الحماية للموقع بس — ملفات `birzeit/data/` لسا بالمستودع العام على GitHub.
+# منصة بلدية بيرزيت
+انتقلت لمستودع خاص مستقل: `mohamad12345-soud/birzeit-municipality` (الرابط: `https://birzeit.gisplatform.uk`، محمية بتسجيل دخول). ملاحظاتها هناك بـ `NOTES.md`.

@@ -2,6 +2,3 @@ deploy/
 .wrangler/
 node_modules/
 
-# بيرزيت: جدول القطع مع روابط سلطة الأراضي (للموظفين، مش للنشر)
-birzeit/parcels_gpkey.csv
-__pycache__/
