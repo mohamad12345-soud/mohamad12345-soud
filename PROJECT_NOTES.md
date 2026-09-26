@@ -222,3 +222,8 @@
   (الطيبة 10/3 و بيرزيت 13/205) ومفحوص بـ assert بسكريبت البناء. بيرزيت: GID=13، VID=19، BID من جدول الأحواض (270–302).
   جدول كل القطع مع الروابط: `birzeit/parcels_gpkey.csv` (**مش بالمستودع** — بـ .gitignore).
 - **الفحص المحلي:** `python3 -m http.server` بجذر المستودع وافتح `/birzeit/`.
+- **تسجيل الدخول:** `worker/index.js` (Worker قبل الملفات الثابتة لمسارات `/birzeit/*` بس — `run_worker_first` بـ `wrangler.jsonc`).
+  المستخدمين بسرّ واحد على Cloudflare: `BIRZEIT_USERS` = JSON `{user: "pbkdf2$100000$salt$hash"}`، يتولّد بـ
+  `python birzeit/tools/add_user.py user1 user2` (أو `--add '<القيمة الحالية>' new_user`). بدون السر المنصة بترجع 503 (مسكّرة).
+  كوكي موقّعة 12 ساعة؛ مفتاح التوقيع مشتق من قيمة السر، فتغييره بيطلّع الكل. محاولات الدخول بتنسجّل بـ Workers Logs.
+  ⚠️ الحماية للموقع بس — ملفات `birzeit/data/` لسا بالمستودع العام على GitHub.
