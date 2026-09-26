@@ -390,7 +390,7 @@ require([
       var n = el("span", "n", l.name);
       b.appendChild(n);
       b.appendChild(el("span", "s", l.gov + (l.nameEn ? " · " + l.nameEn : "")));
-      b.addEventListener("click", function () { selectLocality(l, lastList); });
+      b.addEventListener("click", function () { selectLocality(l, norm(state.q) ? lastList : null); });
       li.appendChild(b);
       ul.appendChild(li);
     });
@@ -469,7 +469,7 @@ require([
   function selectLocality(l, nav) {
     stopTour();
     state.selected = l.oid;
-    state.nav = nav && nav.indexOf(l) >= 0 ? nav : localities.filter(function (x) { return x.govCode === l.govCode; });
+    state.nav = nav && nav.indexOf(l) >= 0 ? nav : govByCode(l.govCode);
     syncSelected();
     if (isMobile()) setTab("map");
     view.closePopup();
@@ -487,10 +487,16 @@ require([
   }
 
   // ===== بطاقة التجمع =====
+  // تجمعات المحافظة مرتبة حسب الرمز (من الأصغر للأكبر)
+  function govByCode(govCode) {
+    return localities.filter(function (x) { return x.govCode === govCode; })
+      .sort(function (x, y) { return x.code < y.code ? -1 : x.code > y.code ? 1 : 0; });
+  }
   function showLoc(l) {
     var same = localities.filter(function (x) { return x.govCode === l.govCode; });
     var g = govs.filter(function (x) { return x.code === l.govCode; })[0];
-    var rank = same.slice().sort(function (x, y) { return y.area - x.area; }).indexOf(l) + 1;
+    // الترتيب = موقع التجمع بين تجمعات محافظته مرتبة حسب رمز التجمع (LOCCODE)
+    var rank = govByCode(l.govCode).indexOf(l) + 1;
     $("locName").textContent = l.nameV;
     $("locCode").textContent = l.code;
     $("locEn").textContent = l.nameEn;
@@ -498,14 +504,18 @@ require([
     $("locArea").textContent = "…";
     // النسبة والترتيب من Shape__Area (نفس نظام الإحداثيات للتجمع ومحافظته، فالنسبة صحيحة)
     $("locShare").textContent = g && g.area && l.area ? fmt(l.area / g.area * 100, l.area / g.area < 0.01 ? 2 : 1) + "%" : "—";
-    $("locRank").textContent = l.area ? rank + " من " + same.length : "—";
+    $("locRank").textContent = rank;
+    $("locOf").textContent = "من " + same.length;
     var notes = $("locNotes");
     notes.textContent = blank(l.notes) ? "" : l.notes.replace(/\s+/g, " ").trim();
     notes.hidden = blank(l.notes);
     var i = state.nav.indexOf(l);
     $("locPos").textContent = (i + 1) + " / " + state.nav.length;
-    $("locPrev").disabled = i <= 0;
-    $("locNext").disabled = i >= state.nav.length - 1;
+    var prev = state.nav[i - 1], next = state.nav[i + 1];
+    $("locPrev").disabled = !prev;
+    $("locNext").disabled = !next;
+    $("locPrevName").textContent = prev ? prev.name : "";
+    $("locNextName").textContent = next ? next.name : "";
     var card = $("loc");
     card.hidden = true; void card.offsetWidth; card.hidden = false; // إعادة حركة الظهور
     $("loc").parentNode.classList.add("has-loc");

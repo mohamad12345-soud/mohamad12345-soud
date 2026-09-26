@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap">
-<link rel="stylesheet" href="app.css?v=fcf2759472">
+<link rel="stylesheet" href="app.css?v=6ab5b873a1">
 </head>
 <body>
 <div class="app" data-tab="dash">
@@ -149,13 +149,13 @@
       <div class="spot-grid g3">
         <div><b id="locArea">—</b><span>كم² تقريباً</span></div>
         <div><b id="locShare">—</b><span>من مساحة المحافظة</span></div>
-        <div><b id="locRank">—</b><span>ترتيبه بالمساحة</span></div>
+        <div class="hl"><b><span id="locRank">—</span><small id="locOf"></small></b><span>الترتيب حسب الرمز</span></div>
       </div>
       <div id="locNotes" class="loc-notes" hidden></div>
       <div class="loc-nav">
-        <button id="locPrev" class="nav-b" type="button"><span aria-hidden="true">→</span> السابق</button>
+        <button id="locPrev" class="nav-b" type="button"><span class="nb-l"><span aria-hidden="true">→</span> السابق</span><small id="locPrevName"></small></button>
         <span id="locPos"></span>
-        <button id="locNext" class="nav-b" type="button">التالي <span aria-hidden="true">←</span></button>
+        <button id="locNext" class="nav-b" type="button"><span class="nb-l">التالي <span aria-hidden="true">←</span></span><small id="locNextName"></small></button>
       </div>
     </div>
     <div id="spot" class="spot" hidden>
@@ -176,6 +176,6 @@
 
 <script src="layers-config.js?v=7145a548b3"></script>
 <script src="https://js.arcgis.com/4.34/"></script>
-<script src="app.js?v=41674344c7"></script>
+<script src="app.js?v=b618f6b230"></script>
 </body>
 </html>

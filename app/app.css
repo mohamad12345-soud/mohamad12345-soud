@@ -262,6 +262,15 @@ html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink); 
 .nav-b { border: 1px solid rgba(255,255,255,.18); background: rgba(255,255,255,.08); color: #fff; border-radius: 9px; padding: 6px 12px; font: inherit; font-size: .84rem; font-weight: 700; cursor: pointer; transition: background-color .2s; }
 .nav-b:hover:not(:disabled) { background: rgba(255,255,255,.18); }
 .nav-b:disabled { opacity: .35; cursor: default; }
+.nav-b { display: inline-flex; flex-direction: column; align-items: center; min-width: 96px; }
+.nav-b small { max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .7rem; font-weight: 600; color: #7dd3fc; }
+.nav-b small:empty { display: none; }
+.loc-nav .nav-b .nb-l, .loc-nav .nav-b .nb-l span { font-size: inherit; color: #fff; }
+/* مربع الترتيب بالذهبي والرقم بسطر واحد */
+.spot-grid div.hl { background: rgba(250,204,21,.12); border-color: rgba(250,204,21,.45); }
+.spot-grid div.hl b { color: #facc15; white-space: nowrap; }
+.spot-grid div.hl b > span { font-size: inherit; color: inherit; }
+.spot-grid div.hl b small { margin-right: 4px; font-size: .72rem; font-weight: 600; color: #bae6fd; }
 /* لما تكون بطاقة التجمع ظاهرة، بطاقة المحافظة تنخفي (بترجع بعد الإغلاق) */
 .map-wrap.has-loc #spot { display: none; }
 
